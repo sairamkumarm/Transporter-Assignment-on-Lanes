@@ -168,7 +168,7 @@ Use greedy for quick demos, optimal for correctness or benchmarks.
 ---
 
 ## Author
-Sairam – Built for FreightFox assignment
+Sairam – Built for FreightFox
 
 ---
 
