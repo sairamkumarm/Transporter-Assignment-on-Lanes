@@ -1,0 +1,195 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Transporter Assignment on Lanes API",
+    "version": "1.0.1",
+    "description": "Assign transporters to shipment lanes in India while minimizing cost and respecting transporter count limits. Includes cost metrics and export support."
+  },
+  "paths": {
+    "/api/v1/transporters/input": {
+      "post": {
+        "summary": "Submit lane and transporter quote data",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InputDataRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Data saved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/transporters/assignment": {
+      "post": {
+        "summary": "Compute optimized assignment plan with metrics",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignmentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Optimized assignment result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/transporters/export": {
+      "get": {
+        "summary": "Export lane assignment results as CSV",
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["csv"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "CSV export of assignments",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "example": "laneId,origin,destination,transporterId,quote\n1,Mumbai,Delhi,1,5000"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "InputDataRequest": {
+        "type": "object",
+        "properties": {
+          "lanes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Lane"
+            }
+          },
+          "transporters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Transporter"
+            }
+          }
+        }
+      },
+      "Lane": {
+        "type": "object",
+        "required": ["id", "origin", "destination"],
+        "properties": {
+          "id": { "type": "integer" },
+          "origin": { "type": "string" },
+          "destination": { "type": "string" }
+        }
+      },
+      "Transporter": {
+        "type": "object",
+        "required": ["id", "name", "laneQuotes"],
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "laneQuotes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LaneQuote"
+            }
+          }
+        }
+      },
+      "LaneQuote": {
+        "type": "object",
+        "required": ["laneId", "quote"],
+        "properties": {
+          "laneId": { "type": "integer" },
+          "quote": { "type": "number" }
+        }
+      },
+      "AssignmentRequest": {
+        "type": "object",
+        "properties": {
+          "maxTransporters": { "type": "integer" }
+        }
+      },
+      "AssignmentResponse": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string" },
+          "totalCost": { "type": "number" },
+          "assignments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LaneAssignment"
+            }
+          },
+          "selectedTransporters": {
+            "type": "array",
+            "items": { "type": "integer" }
+          },
+          "planStats": {
+            "$ref": "#/components/schemas/PlanStats"
+          }
+        }
+      },
+      "LaneAssignment": {
+        "type": "object",
+        "properties": {
+          "laneId": { "type": "integer" },
+          "transporterId": { "type": "integer" }
+        }
+      },
+      "PlanStats": {
+        "type": "object",
+        "properties": {
+          "lanesCovered": { "type": "integer" },
+          "transportersUsed": { "type": "integer" },
+          "coverageRatio": { "type": "number" },
+          "avgQuotePerLane": { "type": "number" },
+          "cheapestLaneMissedByGreedy": { "type": "integer" }
+        }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string" },
+          "message": { "type": "string" }
+        }
+      }
+    }
+  }
+}
