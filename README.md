@@ -26,7 +26,7 @@ Spring Boot application that assigns transporters to shipment lanes while minimi
 ### ✅ Input Data
 - `POST /api/v1/transporters/input`
 - Accepts lane list and transporter quotes
-- NOTE: Current input persistance is limited to an in-memory store with only single session persistance, in light of the limited scope
+- NOTE: Current input persistance is limited to an in-memory store with only single session persistence, in light of the limited scope
   
 
 ### ✅ Optimized Assignment
