@@ -19,6 +19,7 @@ public class DataStore {
     }
 
     public void saveAllLanes(List<Lane> Lanes){
+        laneStore.clear();
         Lanes.forEach(o -> laneStore.put(o.getId(),o));
     }
 
@@ -26,6 +27,7 @@ public class DataStore {
         transporterStore.put(v.getId(), v);
     }
     public void saveAllTransporters(List<Transporter> Transporters) {
+        transporterStore.clear();
         Transporters.forEach(v -> transporterStore.put(v.getId(), v));
     }
 
