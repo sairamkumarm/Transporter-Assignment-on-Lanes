@@ -2,7 +2,9 @@ package com.freightfox_sairamkumarm.transporter_assignment_on_lanes.api;
 
 import com.freightfox_sairamkumarm.transporter_assignment_on_lanes.dto.RequestDTO;
 import com.freightfox_sairamkumarm.transporter_assignment_on_lanes.dto.ResponseDTO;
-import com.freightfox_sairamkumarm.transporter_assignment_on_lanes.service.core.InputService;
+import com.freightfox_sairamkumarm.transporter_assignment_on_lanes.dto.Result;
+import com.freightfox_sairamkumarm.transporter_assignment_on_lanes.dto.SolverInput;
+import com.freightfox_sairamkumarm.transporter_assignment_on_lanes.service.core.AssignmentService;
 import com.freightfox_sairamkumarm.transporter_assignment_on_lanes.service.store.DataStore;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -18,19 +20,22 @@ import java.util.Map;
 @RequestMapping("api/v1/transporters")
 public class AssignmentController {
 
-    private final InputService inputService;
+    private final AssignmentService assignmentService;
     private final DataStore dataStore;
 
-    public AssignmentController(InputService inputService, DataStore dataStore) {
-        this.inputService = inputService;
+    public AssignmentController(AssignmentService assignmentService, DataStore dataStore) {
+        this.assignmentService = assignmentService;
         this.dataStore = dataStore;
     }
 
     @PostMapping("/input")
     public ResponseEntity<ResponseDTO<Map<String, Object>>> takeLanes(@Valid @RequestBody RequestDTO requestDTO){
-        inputService.takeInput(requestDTO);
+        assignmentService.takeInput(requestDTO);
         return ResponseEntity.ok(new ResponseDTO<>("Lanes & Transporters added successfully", "success", new HashMap<>(Map.of("lanes",dataStore.getAllLanes(),"transporters",dataStore.getAllTransporters()))));
     }
 
-
+    @PostMapping("/assignment")
+    public ResponseEntity<ResponseDTO<Result>> assignLanes(@Valid @RequestBody SolverInput solverInput){
+        return ResponseEntity.ok(new ResponseDTO<>("Optimised Assignment found", "success", assignmentService.solve(solverInput.getMaxTransporters())));
+    }
 }
