@@ -5,8 +5,8 @@ Spring Boot application that assigns transporters to shipment lanes while minimi
 ---
 
 ## Tech Stack
-- Java 17
-- Spring Boot 3.x
+- Java 21
+- Spring Boot 3.5.3
 - Maven
 - JUnit 5
 - Lombok
@@ -36,7 +36,7 @@ Spring Boot application that assigns transporters to shipment lanes while minimi
 
 ---
 
-## ✨ Standout Features (Beyond Spec)
+## ✨ Extra
 
 ### Strategy-Based Solver Interface
 - Pluggable `SolverStrategy` design:
@@ -44,27 +44,66 @@ Spring Boot application that assigns transporters to shipment lanes while minimi
   - `BoundedSearchWithPruningSolver`: optimal selection using brute-force subset enumeration + cost pruning
 - Spring profile-driven injection: swap solvers without changing logic
 
-### Plan Metrics in Response
-```json
-"planStats": {
-  "lanesCovered": 10,
-  "transportersUsed": 3,
-  "coverageRatio": 1.0,
-  "avgQuotePerLane": 2900,
-  "cheapestLaneMissedByGreedy": 2
-}
-```
-Helps analyze correctness and efficiency beyond surface cost.
-
-### CSV Export Endpoint
-- `GET /api/v1/transporters/export?format=csv`
-- Returns: `laneId,origin,destination,transporterId,quote`
-- Usable by ops and analysts directly in Excel
 
 ### Custom Validation Layer
-- Validates non-empty quotes, transporter coverage
-- Graceful 400 responses with error field details
 
+## Error Handling
+
+The application uses a **global exception handler** to provide clean, consistent error responses for all incoming API requests. This ensures a better developer experience and helps clients debug issues quickly.
+
+### What’s Handled:
+
+* **Invalid/Missing Fields** → `400 Bad Request`
+
+  * Triggered when DTO validation fails (e.g., missing required fields, out-of-range values)
+  * Returns a map of field-specific errors for easy debugging
+* **Malformed JSON** → `400 Bad Request`
+
+  * Triggered when the request body contains a badly formatted JSON payload
+  * Provides a clear hint that syntax is incorrect
+* **Empty Lanes/Transporters** → `400 Bad Request`
+  * Lanes/transporters cannot be empty and will result in 400s
+
+* **Unhandled Server Errors** → `500 Internal Server Error`
+
+  * Any uncaught exception is caught and wrapped in a generic error response
+  * Prevents leaking stack traces or app internals
+
+---
+
+### 🧪 Example Error Responses
+
+**Validation Failure**
+
+```json
+{
+  "message": "Invalid input",
+  "status": "failed",
+  "data": {
+    "lanes": "must not be empty"
+  }
+}
+```
+
+**Malformed JSON / Invalid Enum**
+
+```json
+{
+  "message": "error",
+  "status": "Invalid input: malformed JSON.",
+  "data": null
+}
+```
+
+**Unhandled Exception**
+
+```json
+{
+  "message": "error",
+  "status": "Unexpected error occurred",
+  "data": null
+}
+```
 ---
 
 ## Data Models
@@ -88,8 +127,7 @@ Helps analyze correctness and efficiency beyond surface cost.
 {
   "totalCost": 29000,
   "assignments": [ { "laneId": 1, "transporterId": 1 }, ... ],
-  "selectedTransporters": [1, 2, 3],
-  "planStats": { ... }
+  "selectedTransporters": [1, 2, 3]
 }
 ```
 
@@ -109,12 +147,11 @@ com.assignment
 ├── dto            // Request/response payloads
 ├── model          // Lane, Transporter, LaneQuote
 ├── service
+│   ├── core       // Input Services, Solvers
 │   └── store      // In-memory store of lanes & transporters
-├── solver         // Greedy + Optimal strategies
-├── util           // PlanStatsBuilder, CSVBuilder
+├── util           // Mappers, etc
 ├── config         // Bean configs, solver profile wiring
-├── exception      // Validation errors, 400 handlers
-└── test           // Unit + integration tests
+└── exception      // Validation errors, 400 handlers
 ```
 
 ---
@@ -140,11 +177,6 @@ App runs on: `http://localhost:8080`
 mvn test
 ```
 
-Coverage includes:
-- Happy path for each endpoint
-- Greedy vs optimal output comparison
-- Edge cases: empty lanes, duplicate IDs, over-capacity
-
 ---
 
 ## API Spec
@@ -157,18 +189,12 @@ Import into:
 
 ---
 
-## Solver Comparison
-| Strategy                  | Optimal? | Time Complexity      |
-|---------------------------|----------|-----------------------|
-| `GreedyCheapestFirst`     | ❌        | O(L * T)              |
-| `BoundedSearchWithPruning`| ✅        | O(2^T * L) (small N only) |
 
-Use greedy for quick demos, optimal for correctness or benchmarks.
-
----
-
-## Author
-Sairam – Built for FreightFox
+#### Thank you for your time.
+——<br>
+With sincere regard,<br>
+Sairamkumar M<br>
+[GitHub](https://github.com/sairamkumarm) | [LinkedIn](https://www.linkedin.com/in/sairamkumarm/)
 
 ---
 
