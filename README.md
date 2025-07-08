@@ -42,10 +42,10 @@ Spring Boot application that assigns transporters to shipment lanes while minimi
 
 ### Strategy-Based Solver Interface
 - Pluggable `SolverStrategy` design:
-  - `GreedyCheapestFirstSolver`: fast, simple baseline
   - `BoundedSearchWithPruningSolver`: optimal selection using brute-force subset enumeration + cost pruning
-- Spring profile-driven injection: swap solvers without changing logic
-
+- Spring profile-driven injection: can swap solvers without changing logic using `"-Dspring-boot.run.arguments=--solver.strategy=poc"
+`
+NOTE: only one solver implemented, this is a poc for future proofing
 
 ### Custom Validation Layer
 
@@ -188,6 +188,7 @@ Import into:
 - Swagger UI
 - Postman
 - Stoplight Studio
+- Insomnia (my pick)
 
 ---
 
